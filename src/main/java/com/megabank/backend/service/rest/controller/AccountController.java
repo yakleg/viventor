@@ -45,12 +45,12 @@ public class AccountController {
 	private ApplicationEventPublisher eventPublisher;
 
 	@GetMapping
-	public List<Account> list(@PathVariable long userId) {
+	public List<Account> list(@PathVariable int userId) {
 		return accountRepository.findAllByUserId(userId);
 	}
 
 	@PostMapping
-	public Account create(@PathVariable long userId, @RequestBody Account account) {
+	public Account create(@PathVariable int userId, @RequestBody Account account) {
 		log.info("Creating account for user #{} with name \"{}\"", userId, account.getName());
 
 		// Link new account with user
@@ -61,7 +61,7 @@ public class AccountController {
 	}
 
 	@DeleteMapping("/{accountId}")
-	public void delete(@PathVariable long userId, @PathVariable long accountId) {
+	public void delete(@PathVariable int userId, @PathVariable int accountId) {
 		log.info("Deleting account #{} of user #{}", accountId, userId);
 
 		checkExists(accountId);
@@ -71,7 +71,7 @@ public class AccountController {
 	}
 
 	@RequestMapping(method = RequestMethod.GET, path = "/{accountId}/balance")
-	public Balance balance(@PathVariable long accountId) {
+	public Balance balance(@PathVariable int accountId) {
 		checkExists(accountId);
 		BigDecimal amount = postingRepository.sumOfPostingsByAccountId(accountId);
 		if (amount == null) {
@@ -80,7 +80,7 @@ public class AccountController {
 		return new Balance(amount);
 	}
 
-	private void checkExists(long accountId) {
+	private void checkExists(int accountId) {
 		if (!accountRepository.exists(accountId)) {
 			throw new ResourceNotFoundException("Account not found.");
 		}

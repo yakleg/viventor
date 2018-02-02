@@ -17,7 +17,7 @@ public class User {
 
 	@Id
 	@GeneratedValue
-	private Long id;
+	private int id;
 
 	@Column(unique = true, nullable = false)
 	private String email;
@@ -30,11 +30,11 @@ public class User {
 	@JsonIgnore
 	private List<Account> accounts;
 
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 

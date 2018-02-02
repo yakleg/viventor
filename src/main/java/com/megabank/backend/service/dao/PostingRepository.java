@@ -8,14 +8,14 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.util.List;
 
-public interface PostingRepository extends JpaRepository<Posting, Long> {
+public interface PostingRepository extends JpaRepository<Posting, Integer> {
 
 	@Query("select p from Posting p join p.account as a where a.id = :accountId and a.user.id = :userId")
-	List<Posting> findAllByAccountIdAndUserId(@Param("userId") long userId, @Param("accountId") long accountId);
+	List<Posting> findAllByAccountIdAndUserId(@Param("userId") int userId, @Param("accountId") int accountId);
 
 	@Query("select sum(p.amount) from Posting p join p.account as a where a.user.id = :userId")
-	BigDecimal sumOfPostingsByUserId(@Param("userId") long userId);
+	BigDecimal sumOfPostingsByUserId(@Param("userId") int userId);
 
 	@Query("select sum(p.amount) from Posting p join p.account as a where a.id = :accountId")
-	BigDecimal sumOfPostingsByAccountId(@Param("accountId") long accountId);
+	BigDecimal sumOfPostingsByAccountId(@Param("accountId") int accountId);
 }

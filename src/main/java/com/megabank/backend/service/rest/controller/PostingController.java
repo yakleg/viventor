@@ -40,14 +40,14 @@ public class PostingController {
 	private ApplicationEventPublisher eventPublisher;
 
 	@GetMapping
-	public List<Posting> list(@PathVariable long userId,
-	                          @PathVariable long accountId) {
+	public List<Posting> list(@PathVariable int userId,
+	                          @PathVariable int accountId) {
 		return postingRepository.findAllByAccountIdAndUserId(userId, accountId);
 	}
 
 	@PostMapping(consumes = APPLICATION_JSON_VALUE)
-	public ResponseEntity create(@PathVariable long userId,
-	                             @PathVariable long accountId,
+	public ResponseEntity create(@PathVariable int userId,
+	                             @PathVariable int accountId,
 	                             @RequestBody Posting posting) {
 		Account account = accountRepository.findByUserIdAndId(userId, accountId);
 		if(account == null) {

@@ -23,7 +23,7 @@ public class Account {
 
 	@Id
 	@GeneratedValue
-	private Long id;
+	private int id;
 
 	@Column(nullable = false)
 	private String name;
@@ -39,11 +39,11 @@ public class Account {
 	@JsonIgnore
 	private User user;
 
-	public Long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 

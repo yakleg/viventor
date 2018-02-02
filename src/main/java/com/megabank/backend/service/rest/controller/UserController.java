@@ -34,7 +34,7 @@ public class UserController {
 	private ApplicationEventPublisher eventPublisher;
 
 	@GetMapping("/{userId}")
-	public User get(@PathVariable long userId) {
+	public User get(@PathVariable int userId) {
 		checkExists(userId);
 		return userRepository.findOne(userId);
 	}
@@ -48,7 +48,7 @@ public class UserController {
 	}
 
 	@DeleteMapping("/{userId}")
-	public void delete(@PathVariable long userId) {
+	public void delete(@PathVariable int userId) {
 		log.info("Deleting user #{}", userId);
 		checkExists(userId);
 		User user = userRepository.getOne(userId);
@@ -56,7 +56,7 @@ public class UserController {
 		userRepository.delete(user);
 	}
 
-	private void checkExists(long userId) {
+	private void checkExists(int userId) {
 		if (!userRepository.exists(userId)) {
 			log.error("User #{} not found", userId);
 			throw new ResourceNotFoundException("User not found.");
