@@ -29,7 +29,7 @@ public class ExceptionController {
 		error.setError(exception.getClass().getCanonicalName());
 		error.setMessage(exception.getMessage());
 
-		log.error("Response ");
+		log.error("Response with error. {} {} {}", status, error, exception);
 		return ResponseEntity.status(status).body(error);
 	}
 }

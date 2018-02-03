@@ -16,12 +16,12 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	private final TokenManager tokenManager;
 
 	@Autowired
-	public SecurityConfigurerAdapter(TokenManager tokenManager) {
+	public SecurityConfig(TokenManager tokenManager) {
 		this.tokenManager = tokenManager;
 	}
 
