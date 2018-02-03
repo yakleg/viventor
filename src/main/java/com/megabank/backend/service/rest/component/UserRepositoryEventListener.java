@@ -46,8 +46,9 @@ public class UserRepositoryEventListener extends AbstractRepositoryEventListener
 	@Override
 	protected void onBeforeDelete(User user) {
 		log.info("Checking for positive balance before user #{} before deletion", user.getId());
-		BigDecimal amount = postingRepository.sumOfPostingsByUserId(user.getId());
-		if (amount != null && ZERO.compareTo(amount) != 0) {
+		BigDecimal amount = postingRepository.sumOfPostingsByUserId(user.getId()).orElse(ZERO);
+
+		if (ZERO.compareTo(amount) != 0) {
 			log.error("Can't delete user #{} with positive balance", user.getId());
 			throw new BusinessException("Can't delete user with positive balance.");
 		}

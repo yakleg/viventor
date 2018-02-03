@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -49,13 +50,12 @@ public class PostingController {
 	public ResponseEntity create(@PathVariable int userId,
 	                             @PathVariable int accountId,
 	                             @RequestBody Posting posting) {
-		Account account = accountRepository.findByUserIdAndId(userId, accountId);
-		if(account == null) {
+		Optional<Account> account = accountRepository.findByUserIdAndId(userId, accountId);
+		// Linking posting with account if it exist
+		posting.setAccount(account.orElseThrow(() -> {
 			log.error("Account #{} of user #{} not found", accountId, userId);
-			throw new ResourceNotFoundException("Account not found.");
-		}
-		// Linking posting with account
-		posting.setAccount(account);
+			return new ResourceNotFoundException("Account not found.");
+		}));
 
 		eventPublisher.publishEvent(new BeforeCreateEvent(posting));
 		postingRepository.save(posting);

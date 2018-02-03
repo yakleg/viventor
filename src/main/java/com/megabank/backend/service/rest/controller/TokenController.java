@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -36,14 +35,12 @@ public class TokenController {
 	@PostMapping(consumes = APPLICATION_JSON_VALUE)
 	public String issue(@RequestBody User user) {
 		log.info("Issuing new token");
-		Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmailAndPassword(user.getEmail(), user.getPassword()));
-		if (userOptional.isPresent()) {
-			user = userOptional.get();
-			return tokenService.issueToken(user).toString();
-		} else {
+		user = userRepository.findByEmailAndPassword(user.getEmail(), user.getPassword()).orElseThrow(() -> {
 			log.error("Specified pair of email and password is not found");
-			throw new RestAuthenticationException("User name and password are not defined.");
-		}
+			return new RestAuthenticationException("User name and password are not defined.");
+		});
+
+		return tokenService.issueToken(user).toString();
 	}
 
 	@DeleteMapping

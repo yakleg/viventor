@@ -26,6 +26,8 @@ import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static java.math.BigDecimal.ZERO;
+
 @RestController
 @RequestMapping(path = "/api/users/{userId}/accounts")
 public class AccountController {
@@ -73,10 +75,7 @@ public class AccountController {
 	@RequestMapping(method = RequestMethod.GET, path = "/{accountId}/balance")
 	public Balance balance(@PathVariable int accountId) {
 		checkExists(accountId);
-		BigDecimal amount = postingRepository.sumOfPostingsByAccountId(accountId);
-		if (amount == null) {
-			amount = BigDecimal.ZERO;
-		}
+		BigDecimal amount = postingRepository.sumOfPostingsByAccountId(accountId).orElse(ZERO);
 		return new Balance(amount);
 	}
 

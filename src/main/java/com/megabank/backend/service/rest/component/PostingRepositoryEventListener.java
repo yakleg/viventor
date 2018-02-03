@@ -32,8 +32,9 @@ public class PostingRepositoryEventListener extends AbstractRepositoryEventListe
 			return;
 		}
 		// Checking of excess balance if new posting amount less than 0
-		BigDecimal amount = postingRepository.sumOfPostingsByAccountId(posting.getAccount().getId());
-		if (amount != null && ZERO.compareTo(amount.add(posting.getAmount())) > 0) {
+		BigDecimal amount = postingRepository.sumOfPostingsByAccountId(posting.getAccount().getId()).orElse(ZERO);
+
+		if (ZERO.compareTo(amount.add(posting.getAmount())) > 0) {
 			log.error("Insufficient funds on account #{}", posting.getAccount().getId());
 			throw new BusinessException("Insufficient funds on account.");
 		}
