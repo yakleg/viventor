@@ -1,4 +1,4 @@
-package com.megabank.backend.service.rest.exception;
+package com.megabank.backend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

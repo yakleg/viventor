@@ -1,6 +1,6 @@
-package com.megabank.backend.service.dao;
+package com.megabank.backend.service.account.dao;
 
-import com.megabank.backend.service.domain.Account;
+import com.megabank.backend.service.account.domain.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

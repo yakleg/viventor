@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.megabank.backend.service.security.api.TokenManager.TOKEN_HEADER;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 public class AuthenticationFilter extends OncePerRequestFilter {
@@ -27,7 +28,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-		Optional<String> tokenOptional = Optional.ofNullable(request.getHeader("X-Auth-Token"));
+		Optional<String> tokenOptional = Optional.ofNullable(request.getHeader(TOKEN_HEADER));
 
 		if (!tokenOptional.isPresent()) {
 			filterChain.doFilter(request, response);

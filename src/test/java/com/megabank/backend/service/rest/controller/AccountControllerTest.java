@@ -1,8 +1,9 @@
 package com.megabank.backend.service.rest.controller;
 
 import com.megabank.backend.Application;
-import com.megabank.backend.service.domain.Account;
-import com.megabank.backend.service.domain.User;
+import com.megabank.backend.service.account.domain.Account;
+import com.megabank.backend.service.account.domain.Posting;
+import com.megabank.backend.service.user.domain.User;
 import com.megabank.backend.service.rest.dto.Balance;
 import com.megabank.backend.service.rest.dto.RestError;
 import org.junit.After;
@@ -57,21 +58,14 @@ public class AccountControllerTest extends BaseTest {
 
 	@Test
 	public void defaultAccountCreatedTest() throws Exception {
-		String json = mvc.perform(
-				get("/api/users/{1}/accounts", user.getId()).header(H_TOKEN, token)
-		)
-				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-
-		Account[] accounts = om.readValue(json, Account[].class);
+		Account[] accounts = getAccounts(user, token);
 		assertEquals(accounts.length, 1);
 
 		Account account = accounts[0];
 		assertEquals(account.getName(), "Default");
 		assertEquals(account.getCurrency(), Currency.getInstance("USD"));
 
-		json = mvc.perform(
+		String json = mvc.perform(
 				get("/api/users/{1}/accounts/{2}/postings", user.getId(), account.getId()).header(H_TOKEN, token)
 		)
 				.andExpect(status().isOk())
@@ -93,22 +87,14 @@ public class AccountControllerTest extends BaseTest {
 
 	@Test
 	public void deleteLastAccount() throws Exception {
-
-		String json = mvc.perform(
-				get("/api/users/{1}/accounts", user.getId()).header(H_TOKEN, token)
-		)
-				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-
-		Account[] accounts = om.readValue(json, Account[].class);
+		Account[] accounts = getAccounts(user, token);
 		assertEquals(accounts.length, 1);
 
 		Account account = accounts[0];
 		assertEquals(account.getName(), "Default");
 		assertEquals(account.getCurrency(), Currency.getInstance("USD"));
 
-		json = mvc.perform(
+		String json = mvc.perform(
 				delete("/api/users/{1}/accounts/{2}", user.getId(), account.getId()).header(H_TOKEN, token)
 		)
 				.andExpect(status().is4xxClientError())
@@ -139,14 +125,7 @@ public class AccountControllerTest extends BaseTest {
 				delete("/api/users/{1}/accounts/{2}", user.getId(), account.getId()).header(H_TOKEN, token)
 		).andExpect(status().isOk());
 
-		json = mvc.perform(
-				get("/api/users/{1}/accounts", user.getId()).header(H_TOKEN, token)
-		)
-				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-
-		Account[] accounts = om.readValue(json, Account[].class);
+		Account[] accounts = getAccounts(user, token);
 		assertEquals(accounts.length, 1);
 
 		account = accounts[0];
@@ -156,13 +135,9 @@ public class AccountControllerTest extends BaseTest {
 
 	@Test
 	public void depositAndWithdrawAbilityTest() throws Exception {
-		String accountJson = mvc.perform(
-				get("/api/users/{1}/accounts", user.getId()).header(H_TOKEN, token)
-		)
-				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andReturn().getResponse().getContentAsString();
-		Account account = om.readValue(accountJson, Account[].class)[0];
+		Account[] accounts = getAccounts(user, token);
+		assertTrue(accounts.length == 1);
+		Account account = accounts[0];
 
 		//put on deposit 1000
 		mvc.perform(
@@ -248,5 +223,66 @@ public class AccountControllerTest extends BaseTest {
 		)
 				.andExpect(status().is4xxClientError());
 
+	}
+
+	@Test
+	public void statementTest() throws Exception {
+		Account[] accounts = getAccounts(user, token);
+		assertTrue(accounts.length == 1);
+		Account account = accounts[0];
+
+		mvc.perform(
+				post("/api/users/{1}/accounts/{2}/postings", user.getId(), account.getId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"amount\": 1000, \"description\": \"First deposit\"}")
+						.header(H_TOKEN, token)
+		).andExpect(status().isOk());
+
+		mvc.perform(
+				post("/api/users/{1}/accounts/{2}/postings", user.getId(), account.getId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"amount\": 1000, \"description\": \"Second deposit\"}")
+						.header(H_TOKEN, token)
+		).andExpect(status().isOk());
+
+		mvc.perform(
+				post("/api/users/{1}/accounts/{2}/postings", user.getId(), account.getId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"amount\": -1000, \"description\": \"First spent\"}")
+						.header(H_TOKEN, token)
+		).andExpect(status().isOk());
+
+		mvc.perform(
+				post("/api/users/{1}/accounts/{2}/postings", user.getId(), account.getId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"amount\": -1000, \"description\": \"Second spent\"}")
+						.header(H_TOKEN, token)
+		).andExpect(status().isOk());
+
+		String json = mvc.perform(
+				get("/api/users/{1}/accounts/{2}/postings", user.getId(), account.getId()).header(H_TOKEN, token)
+		)
+				.andExpect(status().isOk())
+				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse().getContentAsString();
+
+		Posting[] postings = om.readValue(json, Posting[].class);
+		assertEquals(postings.length, 4);
+
+		assertEquals(postings[0].getDescription(), "First deposit");
+		assertNotNull(postings[0].getCreated());
+		assertEquals(postings[0].getAmount().longValue(), 1000L);
+
+		assertEquals(postings[1].getDescription(), "Second deposit");
+		assertNotNull(postings[1].getCreated());
+		assertEquals(postings[1].getAmount().longValue(), 1000L);
+
+		assertEquals(postings[2].getDescription(), "First spent");
+		assertNotNull(postings[2].getCreated());
+		assertEquals(postings[2].getAmount().longValue(), -1000L);
+
+		assertEquals(postings[3].getDescription(), "Second spent");
+		assertNotNull(postings[3].getCreated());
+		assertEquals(postings[3].getAmount().longValue(), -1000L);
 	}
 }

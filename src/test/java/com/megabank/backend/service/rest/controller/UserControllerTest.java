@@ -1,7 +1,7 @@
 package com.megabank.backend.service.rest.controller;
 
 import com.megabank.backend.Application;
-import com.megabank.backend.service.domain.User;
+import com.megabank.backend.service.user.domain.User;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

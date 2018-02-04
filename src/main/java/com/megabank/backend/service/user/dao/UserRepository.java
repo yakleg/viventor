@@ -1,11 +1,11 @@
-package com.megabank.backend.service.dao;
+package com.megabank.backend.service.user.dao;
 
-import com.megabank.backend.service.domain.User;
+import com.megabank.backend.service.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-	Optional<User> findByEmailAndPassword(String email, String password);
+	Optional<User> findByEmail(String email);
 }

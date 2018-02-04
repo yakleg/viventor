@@ -1,8 +1,8 @@
-package com.megabank.backend.service.rest.component;
+package com.megabank.backend.service.account.component;
 
-import com.megabank.backend.service.dao.PostingRepository;
-import com.megabank.backend.service.domain.Posting;
-import com.megabank.backend.service.rest.exception.BusinessException;
+import com.megabank.backend.service.account.dao.PostingRepository;
+import com.megabank.backend.service.account.domain.Posting;
+import com.megabank.backend.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,87 +1,63 @@
 package com.megabank.backend.service.rest.controller;
 
 
-import com.megabank.backend.service.dao.AccountRepository;
-import com.megabank.backend.service.dao.PostingRepository;
-import com.megabank.backend.service.dao.UserRepository;
-import com.megabank.backend.service.domain.Account;
-import com.megabank.backend.service.domain.User;
+import com.megabank.backend.service.account.api.AccountManager;
+import com.megabank.backend.service.account.domain.Account;
+import com.megabank.backend.service.account.domain.Posting;
 import com.megabank.backend.service.rest.dto.Balance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.rest.core.event.BeforeDeleteEvent;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static java.math.BigDecimal.ZERO;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@RequestMapping(path = "/api/users/{userId}/accounts")
+@RequestMapping(path = "/api/users/{userId}/accounts", produces = APPLICATION_JSON_VALUE)
 public class AccountController {
 
-	private final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private AccountManager accountManager;
 
 	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private AccountRepository accountRepository;
-
-	@Autowired
-	private PostingRepository postingRepository;
-
-	@Autowired
-	private ApplicationEventPublisher eventPublisher;
+	public void setAccountManager(AccountManager accountManager) {
+		this.accountManager = accountManager;
+	}
 
 	@GetMapping
 	public List<Account> list(@PathVariable int userId) {
-		return accountRepository.findAllByUserId(userId);
+		return accountManager.findAll(userId);
 	}
 
-	@PostMapping
+	@PostMapping(consumes = APPLICATION_JSON_VALUE)
 	public Account create(@PathVariable int userId, @RequestBody Account account) {
-		log.info("Creating account for user #{} with name \"{}\"", userId, account.getName());
-
-		// Link new account with user
-		User user = userRepository.getOne(userId);
-		account.setUser(user);
-
-		return accountRepository.save(account);
+		return accountManager.addAccount(userId, account);
 	}
 
 	@DeleteMapping("/{accountId}")
-	public void delete(@PathVariable int userId, @PathVariable int accountId) {
-		log.info("Deleting account #{} of user #{}", accountId, userId);
-
-		checkExists(accountId);
-		Account account = accountRepository.findOne(accountId);
-		eventPublisher.publishEvent(new BeforeDeleteEvent(account));
-		accountRepository.delete(accountId);
+	public void delete(@PathVariable int accountId) {
+		accountManager.delete(accountId);
 	}
 
-	@RequestMapping(method = RequestMethod.GET, path = "/{accountId}/balance")
+	@GetMapping("/{accountId}/balance")
 	public Balance balance(@PathVariable int accountId) {
-		checkExists(accountId);
-		BigDecimal amount = postingRepository.sumOfPostingsByAccountId(accountId).orElse(ZERO);
-		return new Balance(amount);
+		BigDecimal balance = accountManager.getBalance(accountId);
+		return new Balance(balance);
 	}
 
-	private void checkExists(int accountId) {
-		if (!accountRepository.exists(accountId)) {
-			throw new ResourceNotFoundException("Account not found.");
-		}
+	@GetMapping("/{accountId}/postings")
+	public List<Posting> getStatement(@PathVariable int accountId) {
+		return accountManager.getStatement(accountId);
+	}
+
+	@PostMapping(path = "/{accountId}/postings", consumes = APPLICATION_JSON_VALUE)
+	public Posting addPosting(@PathVariable int accountId, @RequestBody Posting posting) {
+		return accountManager.addPosting(accountId, posting);
 	}
 }

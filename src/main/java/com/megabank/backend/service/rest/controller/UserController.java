@@ -1,13 +1,9 @@
 package com.megabank.backend.service.rest.controller;
 
-import com.megabank.backend.service.dao.UserRepository;
-import com.megabank.backend.service.domain.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.megabank.backend.service.security.annotation.AnonymousAccess;
+import com.megabank.backend.service.user.api.UserManager;
+import com.megabank.backend.service.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.rest.core.event.AfterCreateEvent;
-import org.springframework.data.rest.core.event.BeforeDeleteEvent;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,49 +13,33 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.lang.invoke.MethodHandles;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping(value = "/api/users", produces = APPLICATION_JSON_VALUE)
 public class UserController {
 
-	private final Logger log = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+	private UserManager userManager;
 
 	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private ApplicationEventPublisher eventPublisher;
+	public void setUserManager(UserManager userManager) {
+		this.userManager = userManager;
+	}
 
 	@GetMapping("/{userId}")
 	public User get(@PathVariable int userId) {
-		checkExists(userId);
-		return userRepository.findOne(userId);
+		return userManager.find(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User not found."));
 	}
 
+	@AnonymousAccess
 	@PostMapping(consumes = APPLICATION_JSON_VALUE)
 	public User create(@RequestBody User user) {
-		log.info("Creating new user");
-		userRepository.save(user);
-		eventPublisher.publishEvent(new AfterCreateEvent(user));
-		return user;
+		return userManager.create(user);
 	}
 
 	@DeleteMapping("/{userId}")
 	public void delete(@PathVariable int userId) {
-		log.info("Deleting user #{}", userId);
-		checkExists(userId);
-		User user = userRepository.getOne(userId);
-		eventPublisher.publishEvent(new BeforeDeleteEvent(user));
-		userRepository.delete(user);
-	}
-
-	private void checkExists(int userId) {
-		if (!userRepository.exists(userId)) {
-			log.error("User #{} not found", userId);
-			throw new ResourceNotFoundException("User not found.");
-		}
+		userManager.delete(userId);
 	}
 }

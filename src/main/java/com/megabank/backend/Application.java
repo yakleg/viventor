@@ -7,13 +7,15 @@ import org.springframework.boot.autoconfigure.data.rest.RepositoryRestMvcAutoCon
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.guava.GuavaCacheManager;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication(
 		scanBasePackages = {
 				"com.megabank.backend.configuration",
-				"com.megabank.backend.service.dao",
+				"com.megabank.backend.service.**.aspect",
+				"com.megabank.backend.service.**.dao",
 				"com.megabank.backend.service.**.component",
 				"com.megabank.backend.service.**.controller"
 		},
@@ -21,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 				RepositoryRestMvcAutoConfiguration.class
 		}
 )
+@EnableAspectJAutoProxy
 public class Application {
 	/*
 	ToDo: - Data validation

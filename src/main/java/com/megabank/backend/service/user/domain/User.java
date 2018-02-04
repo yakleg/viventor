@@ -1,7 +1,8 @@
-package com.megabank.backend.service.domain;
+package com.megabank.backend.service.user.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.megabank.backend.service.account.domain.Account;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

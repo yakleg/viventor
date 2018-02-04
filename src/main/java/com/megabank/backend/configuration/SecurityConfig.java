@@ -1,6 +1,5 @@
 package com.megabank.backend.configuration;
 
-import com.megabank.backend.service.security.SecurityExpressionHandler;
 import com.megabank.backend.service.security.api.TokenManager;
 import com.megabank.backend.service.security.AuthenticationFilter;
 import com.megabank.backend.service.security.TokenAuthenticationProvider;
@@ -29,10 +28,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		return new TokenAuthenticationProvider(tokenManager);
 	}
 
-	private SecurityExpressionHandler getSecurityExpressionHandler() {
-		return new SecurityExpressionHandler();
-	}
-
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) {
 		auth.authenticationProvider(getTokenAuthenticationProvider());
@@ -47,12 +42,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 				.authorizeRequests()
 				.antMatchers(HttpMethod.POST, "/api/token", "/api/users").permitAll()
-				//
 				.antMatchers(HttpMethod.DELETE, "/api/token").hasRole("USER")
-				//
-				.antMatchers("/api/users/**").access("hasRole('USER') and isOwnerOfResource()")
-				// register isOwnerOfResource expression handler
-				.expressionHandler(getSecurityExpressionHandler());
+				.antMatchers("/api/users/**").access("hasRole('USER')");
 
 		httpSecurity
 				.addFilterBefore(new AuthenticationFilter(authenticationManager()), BasicAuthenticationFilter.class);

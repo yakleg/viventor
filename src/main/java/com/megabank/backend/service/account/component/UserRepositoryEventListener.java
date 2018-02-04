@@ -1,10 +1,10 @@
-package com.megabank.backend.service.rest.component;
+package com.megabank.backend.service.account.component;
 
-import com.megabank.backend.service.dao.AccountRepository;
-import com.megabank.backend.service.dao.PostingRepository;
-import com.megabank.backend.service.domain.Account;
-import com.megabank.backend.service.domain.User;
-import com.megabank.backend.service.rest.exception.BusinessException;
+import com.megabank.backend.service.account.dao.AccountRepository;
+import com.megabank.backend.service.account.dao.PostingRepository;
+import com.megabank.backend.service.account.domain.Account;
+import com.megabank.backend.service.user.domain.User;
+import com.megabank.backend.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +39,8 @@ public class UserRepositoryEventListener extends AbstractRepositoryEventListener
 		account.setName("Default");
 		account.setUser(user);
 		account.setCurrency(Currency.getInstance("USD")); // TaDa hardcode...
-		log.info("Creating \"Default\" account for user #{}", user.getId());
 		accountRepository.save(account);
+		log.info("Created \"Default\" account for user #{}", user.getId());
 	}
 
 	@Override

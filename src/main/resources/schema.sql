@@ -11,7 +11,7 @@ CREATE TABLE accounts (
   id       INT IDENTITY PRIMARY KEY,
   name     VARCHAR(255),
   currency VARCHAR(3),
-  user_id  INT,
+  user_id  INT NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users (id)
     ON DELETE CASCADE
 );
@@ -24,7 +24,7 @@ CREATE TABLE postings (
   amount      DECIMAL(7, 2) NOT NULL,
   description VARCHAR(1024),
   created     DATETIME      NOT NULL,
-  account_id  INT,
+  account_id  INT NOT NULL,
   FOREIGN KEY (account_id) REFERENCES accounts (id)
     ON DELETE CASCADE
 )
